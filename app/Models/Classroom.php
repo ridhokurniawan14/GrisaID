@@ -39,4 +39,15 @@ class Classroom extends Model
     {
         return $query->whereHas('academicYear', fn(Builder $q) => $q->where('is_active', true));
     }
+    public function deletionBlockedReason(): ?string
+    {
+        $count = $this->enrollments_count ?? $this->enrollments()->count();
+
+        return $count > 0 ? "Masih memiliki {$count} siswa terdaftar." : null;
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(fn(self $classroom): bool => $classroom->deletionBlockedReason() === null);
+    }
 }

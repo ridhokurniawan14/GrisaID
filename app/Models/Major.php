@@ -21,4 +21,15 @@ class Major extends Model
     {
         return $this->hasMany(Classroom::class);
     }
+    public function deletionBlockedReason(): ?string
+    {
+        return $this->classrooms()->withTrashed()->exists()
+            ? 'Masih dipakai oleh kelas. Nonaktifkan saja jika sudah tidak digunakan.'
+            : null;
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(fn(self $major): bool => $major->deletionBlockedReason() === null);
+    }
 }

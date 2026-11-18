@@ -3,9 +3,12 @@
 namespace App\Filament\Resources\Classrooms\Tables;
 
 use App\Models\AcademicYear;
+use App\Models\Classroom;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -40,6 +43,10 @@ class ClassroomsTable
             ])
             ->recordActions([
                 EditAction::make(),
+                DeleteAction::make()
+                    ->disabled(fn(Classroom $record): bool => $record->deletionBlockedReason() !== null)
+                    ->tooltip(fn(Classroom $record): ?string => $record->deletionBlockedReason()),
+                RestoreAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

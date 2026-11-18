@@ -57,4 +57,19 @@ class AcademicYear extends Model
             $this->forceFill(['is_active' => true])->save();
         });
     }
+
+    /** Alasan tahun ajaran tidak boleh dihapus (null = boleh). */
+    public function deletionBlockedReason(): ?string
+    {
+        return match (true) {
+            $this->is_active => 'Tahun ajaran aktif tidak bisa dihapus.',
+            $this->classrooms()->withTrashed()->exists() => 'Masih memiliki kelas. Hapus atau pindahkan kelasnya dulu.',
+            default => null,
+        };
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(fn(self $year): bool => $year->deletionBlockedReason() === null);
+    }
 }
