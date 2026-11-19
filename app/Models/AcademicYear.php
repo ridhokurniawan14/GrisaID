@@ -58,10 +58,6 @@ class AcademicYear extends Model
             $this->forceFill(['is_active' => true])->save();
         });
     }
-<<<<<<< HEAD
-=======
-
->>>>>>> b696d6b38e355c2f9972314a6a703dc86fe26c84
     /** Alasan tahun ajaran tidak boleh dihapus (null = boleh). */
     public function deletionBlockedReason(): ?string
     {
