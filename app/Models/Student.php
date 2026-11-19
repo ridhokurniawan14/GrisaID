@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\Gender;
 use App\Enums\StudentStatus;
 use App\Models\Concerns\HasPublicUuid;
+use App\Models\Concerns\LogsMasterData;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Student extends Model
 {
-    use HasPublicUuid, SoftDeletes;
+    use HasPublicUuid, SoftDeletes, LogsMasterData;
 
     protected $fillable = [
         'nisn',
@@ -74,6 +75,14 @@ class Student extends Model
             is_numeric($classroom)
                 ? $q->whereKey((int) $classroom)
                 : $q->where('name', $classroom);
+        });
+    }
+    protected static function booted(): void
+    {
+        static::saving(function (self $student): void {
+            if ($student->isDirty('status')) {
+                $student->status_changed_at = now();
+            }
         });
     }
 }

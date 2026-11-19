@@ -18,7 +18,7 @@ class MajorResource extends Resource
 {
     protected static ?string $model = Major::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 
     public static function form(Schema $schema): Schema
     {

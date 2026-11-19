@@ -16,4 +16,13 @@ class EditAcademicYear extends EditRecord
             DeleteAction::make(),
         ];
     }
+    protected function getRedirectUrl(): string
+    {
+        return \App\Filament\Resources\AcademicYears\AcademicYearResource::getUrl('index');
+    }
+
+    protected function getSavedNotificationTitle(): ?string
+    {
+        return "Tahun ajaran {$this->getRecord()->code} berhasil diperbarui";
+    }
 }

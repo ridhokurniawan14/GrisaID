@@ -20,4 +20,13 @@ class EditClassroom extends EditRecord
             RestoreAction::make(),
         ];
     }
+    protected function getRedirectUrl(): string
+    {
+        return \App\Filament\Resources\Classrooms\ClassroomResource::getUrl('index');
+    }
+
+    protected function getSavedNotificationTitle(): ?string
+    {
+        return "Kelas {$this->getRecord()->name} berhasil diperbarui";
+    }
 }

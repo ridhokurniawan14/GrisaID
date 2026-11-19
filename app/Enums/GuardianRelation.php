@@ -16,4 +16,10 @@ enum GuardianRelation: string
             self::Guardian => 'Wali',
         };
     }
+
+    /** @return array<string, string> [nilai => label] untuk pilihan form */
+    public static function options(): array
+    {
+        return array_reduce(self::cases(), fn(array $carry, self $case) => $carry + [$case->value => $case->label()], []);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasPublicUuid;
+use App\Models\Concerns\LogsMasterData;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class AcademicYear extends Model
 {
-    use HasPublicUuid;
+    use HasPublicUuid, LogsMasterData;
 
     protected $fillable = ['code', 'name', 'start_date', 'end_date', 'is_active'];
 
@@ -56,5 +57,19 @@ class AcademicYear extends Model
             static::query()->where('is_active', true)->whereKeyNot($this->getKey())->update(['is_active' => false]);
             $this->forceFill(['is_active' => true])->save();
         });
+    }
+    /** Alasan tahun ajaran tidak boleh dihapus (null = boleh). */
+    public function deletionBlockedReason(): ?string
+    {
+        return match (true) {
+            $this->is_active => 'Tahun ajaran aktif tidak bisa dihapus.',
+            $this->classrooms()->withTrashed()->exists() => 'Masih memiliki kelas. Hapus atau pindahkan kelasnya dulu.',
+            default => null,
+        };
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(fn(self $year): bool => $year->deletionBlockedReason() === null);
     }
 }

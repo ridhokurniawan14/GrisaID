@@ -16,4 +16,13 @@ class EditMajor extends EditRecord
             DeleteAction::make(),
         ];
     }
+    protected function getRedirectUrl(): string
+    {
+        return \App\Filament\Resources\Majors\MajorResource::getUrl('index');
+    }
+
+    protected function getSavedNotificationTitle(): ?string
+    {
+        return "Jurusan {$this->getRecord()->name} berhasil diperbarui";
+    }
 }

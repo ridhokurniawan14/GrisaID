@@ -37,7 +37,7 @@ class AcademicYearForm
                     ->label('Aktif')
                     ->disabled()
                     ->dehydrated(false)
-                    ->helperText('Gunakan tombol "Jadikan aktif" di daftar tahun ajaran.'),
+                    ->helperText('Ubah lewat saklar "Aktif" di daftar tahun ajaran.'),
             ]);
     }
 }
