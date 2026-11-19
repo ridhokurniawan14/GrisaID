@@ -20,7 +20,11 @@ class ClassroomResource extends Resource
 {
     protected static ?string $model = Classroom::class;
 
+<<<<<<< HEAD
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice;
+=======
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::BuildingOffice;
+>>>>>>> b696d6b38e355c2f9972314a6a703dc86fe26c84
 
     public static function form(Schema $schema): Schema
     {
