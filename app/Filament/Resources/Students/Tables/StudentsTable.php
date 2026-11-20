@@ -86,6 +86,10 @@ class StudentsTable
                         'guardians',
                         fn(Builder $guardian) => $guardian->whereNotNull('whatsapp')->where('whatsapp', '!=', '')
                     )),
+                Filter::make('no_current_classroom')
+                    ->label('Belum punya kelas (tahun ajaran aktif)')
+                    ->toggle()
+                    ->query(fn(Builder $query): Builder => $query->whereDoesntHave('currentEnrollment')),
                 TrashedFilter::make(),
             ])
             ->recordActions([
@@ -162,6 +166,41 @@ class StudentsTable
                             Notification::make()
                                 ->success()
                                 ->title("{$records->count()} siswa dipindahkan ke {$classroom->name}")
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                    BulkAction::make('changeStatusBulk')
+                        ->label('Ubah status')
+                        ->icon('heroicon-o-arrow-path')
+                        ->color('warning')
+                        ->modalHeading('Ubah status siswa terpilih')
+                        ->modalDescription('Status Lulus, Mutasi, atau DO menandai siswa sudah tidak aktif. Datanya tetap tersimpan, jadi riwayat tagihan tidak hilang.')
+                        ->schema([
+                            Select::make('status')
+                                ->label('Status baru')
+                                ->options(StudentStatus::options())
+                                ->required(),
+                        ])
+                        ->action(function (Collection $records, array $data): void {
+                            $status = StudentStatus::from($data['status']);
+                            $year = AcademicYear::current();
+
+                            DB::transaction(function () use ($records, $status, $year): void {
+                                foreach ($records as $student) {
+                                    $student->update(['status' => $status->value]);
+
+                                    if ($year !== null) {
+                                        StudentEnrollment::query()
+                                            ->where('student_id', $student->id)
+                                            ->where('academic_year_id', $year->id)
+                                            ->update(['status' => EnrollmentStatus::from($status->value)->value]);
+                                    }
+                                }
+                            });
+
+                            Notification::make()
+                                ->success()
+                                ->title("{$records->count()} siswa diubah menjadi {$status->label()}")
                                 ->send();
                         })
                         ->deselectRecordsAfterCompletion(),

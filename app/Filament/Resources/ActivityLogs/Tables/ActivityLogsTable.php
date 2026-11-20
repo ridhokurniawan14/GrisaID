@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ActivityLogs\Tables;
 
+use App\Models\Student;
 use App\Models\StudentEnrollment;
 use App\Models\StudentGuardian;
 use App\Support\ActivityChangeFormatter;
@@ -41,7 +42,8 @@ class ActivityLogsTable
                     ->sortable(),
                 TextColumn::make('causer.name')
                     ->label('Oleh')
-                    ->placeholder('Sistem'),
+                    ->placeholder('Sistem')
+                    ->searchable(),
                 TextColumn::make('log_name')
                     ->label('Data')
                     ->badge()
@@ -59,7 +61,25 @@ class ActivityLogsTable
                     }),
                 TextColumn::make('subject_label')
                     ->label('Objek')
-                    ->state(fn(Activity $record): string => self::subjectLabel($record)),
+                    ->state(fn(Activity $record): string => self::subjectLabel($record))
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search) . '%';
+
+                        $studentIds = Student::withTrashed()
+                            ->where(fn(Builder $student) => $student->where('full_name', 'ilike', $like)->orWhere('nisn', 'ilike', $like))
+                            ->limit(500)
+                            ->pluck('id');
+
+                        return $query->where(function (Builder $q) use ($like, $studentIds): void {
+                            $q->whereRaw('attribute_changes::text ilike ?', [$like])
+                                ->orWhereRaw('properties::text ilike ?', [$like])
+                                ->orWhere(fn(Builder $s) => $s->where('subject_type', Student::class)->whereIn('subject_id', $studentIds))
+                                ->orWhere(fn(Builder $s) => $s->where('subject_type', StudentGuardian::class)
+                                    ->whereIn('subject_id', StudentGuardian::query()->whereIn('student_id', $studentIds)->select('id')))
+                                ->orWhere(fn(Builder $s) => $s->where('subject_type', StudentEnrollment::class)
+                                    ->whereIn('subject_id', StudentEnrollment::query()->whereIn('student_id', $studentIds)->select('id')));
+                        });
+                    }),
                 TextColumn::make('changes')
                     ->label('Perubahan')
                     ->state(fn(Activity $record): array => self::changeLines($record))
