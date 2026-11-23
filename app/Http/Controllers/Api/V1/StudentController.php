@@ -84,6 +84,10 @@ class StudentController extends Controller
             });
         }
 
+        if (in_array('guardians', explode(',', (string) $request->query('include')), true)) {
+            $query->with('guardians');
+        }
+
         return StudentResource::collection(
             $query->paginate((int) ($filters['per_page'] ?? 50))->withQueryString()
         );
