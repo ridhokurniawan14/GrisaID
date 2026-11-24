@@ -23,6 +23,7 @@ class ListStudents extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            \App\Filament\Actions\ImportAlumniAction::make(),
             Action::make('importDapodik')
                 ->label('Impor Dapodik')
                 ->icon('heroicon-o-arrow-up-tray')
