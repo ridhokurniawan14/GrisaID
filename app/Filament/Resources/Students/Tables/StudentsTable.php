@@ -21,6 +21,7 @@ use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
@@ -36,7 +37,8 @@ class StudentsTable
         return $table
             ->modifyQueryUsing(fn(Builder $query) => $query->with(['currentEnrollment.classroom', 'guardians']))
             ->columns([
-                TextColumn::make('nisn')->label('NISN')->searchable()->sortable()->copyable(),
+                // Klik NISN = salin (tidak membuka halaman edit). NISN = username login siswa.
+                ViewColumn::make('nisn')->label('NISN (username)')->view('filament.columns.copy')->searchable()->sortable(),
                 TextColumn::make('full_name')->label('Nama')->searchable()->sortable(),
                 TextColumn::make('gender')
                     ->label('JK')

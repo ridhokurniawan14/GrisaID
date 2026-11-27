@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\V1\StudentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Laravel\Passport\Http\Middleware\EnsureClientIsResourceOwner as ClientScope;
+use App\Http\Controllers\Api\V1\MeController;
+use Laravel\Passport\Http\Middleware\CheckToken;
 
 Route::prefix('v1')->name('api.v1.')->group(function () {
     Route::get('/ping', fn(Request $request) => response()->json([
@@ -13,6 +15,10 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         'app' => config('app.name'),
         'time' => now()->toIso8601String(),
     ]))->middleware(ClientScope::class)->name('ping');
+
+    Route::middleware(['auth:api', CheckToken::using('me:read'), 'throttle:60,1'])->group(function () {
+        Route::get('/me', MeController::class)->name('me');
+    });
 
     Route::middleware(ClientScope::using('students:read'))->group(function () {
         Route::get('/students', [StudentController::class, 'index'])->name('students.index');
